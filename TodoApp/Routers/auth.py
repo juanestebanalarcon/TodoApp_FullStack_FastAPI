@@ -1,7 +1,7 @@
 
 import sys
 sys.path.append("..")
-from fastapi import Depends, HTTPException,status,APIRouter
+from fastapi import Depends, HTTPException,status,APIRouter,Request
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 from pydantic import BaseModel
 from typing import Optional
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 import models
 from passlib.context import CryptContext
 
@@ -26,7 +28,7 @@ class CreateUser(BaseModel):
 bcrypt_context= CryptContext(schemes=["bcrypt"], deprecated="auto")
 models.Base.metadata.create_all(bind=engine)
 oauth2_bearer=OAuth2PasswordBearer(tokenUrl="token")
-
+templates= Jinja2Templates(directory="templates")
 
 router = APIRouter(prefix="/auth",tags=["auth"],responses={401:{"user":"Not authorized"}})
 
@@ -90,6 +92,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm=Depends(),
     token_expires = timedelta(minutes=20)
     token=create_access_token(user.username,user.id,expires_delta=token_expires)
     return {"token":token}
+
+@router.get("/",response_class=HTMLResponse)
+async def authPage(req:Request):
+    return templates.TemplateResponse("login.html",{"request":req})
+@router.get("/register",response_class=HTMLResponse)
+async def register(req:Request):
+    return templates.TemplateResponse("register.html",{"request":req})
+    
 #Exceptions
 def get_user_exception():
     credentails_exception=HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,

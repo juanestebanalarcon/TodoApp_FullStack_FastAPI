@@ -1,5 +1,7 @@
 
 import sys
+
+from markupsafe import HasHTML
 sys.path.append("..")
 from fastapi import APIRouter, Depends,HTTPException,Request
 from sqlalchemy.orm import Session
@@ -21,3 +23,14 @@ def getDB():
         yield db
     finally:
         db.close()
+
+#Routes
+@router.get("/",response_class=HTMLResponse)
+async def read_all_by_user(req:Request):
+    return templates.TemplateResponse("home.html",{"request":req})
+@router.get("/add-todo",response_class=HTMLResponse)
+async def add_new_todo(req:Request):
+    return templates.TemplateResponse("add-todo.html",{"request":req})
+@router.get("/edit-todo/{todo_id}",response_class=HTMLResponse)
+async def edit_todo(req:Request):
+    return templates.TemplateResponse("edit-todo.html",{"request":req})
