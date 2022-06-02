@@ -23,6 +23,8 @@ sqlalchemy = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
 python-jose = {extras = ["cryptography"], version = "*"}
 psycopg2-binary = "*"
+aiofiles = "*"
+jinja2 = "*"
 
 [dev-packages]
 
