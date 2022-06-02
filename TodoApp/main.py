@@ -1,11 +1,12 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 import models
 from database import engine
 from Routers import auth,Todos
-from Company import company_apis,dependencies
+from starlette.staticfiles import StaticFiles
+
 app=FastAPI(title="FastAPI: TodoApp")
 models.Base.metadata.create_all(bind=engine)
 
+app.mount("/static",StaticFiles(directory="static"),name="static")
 app.include_router(auth.router)
 app.include_router(Todos.router)
-app.include_router(company_apis.router,dependencies=[Depends(dependencies.get_token_header)])

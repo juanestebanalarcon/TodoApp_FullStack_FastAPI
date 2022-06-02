@@ -1,18 +1,19 @@
 
 import sys
-sys.path.routerend("..")
-from fastapi import APIRouter, Depends,HTTPException
+sys.path.append("..")
+from fastapi import APIRouter, Depends,HTTPException,Request
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
 import models
 from pydantic import BaseModel, Field
 from typing import Optional
-from auth import get_current_user,get_user_exception
-
+from Routers.auth import get_current_user,get_user_exception
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 router=APIRouter(prefix="/todos",tags=["Todos"],responses={404:{"description":"Not found"}})
 models.Base.metadata.create_all(bind=engine)
-
+templates= Jinja2Templates(directory="templates")
 
 def getDB():
     try:
@@ -65,7 +66,11 @@ async def delete_todo(todo_id:int,user:dict=Depends(get_current_user),db:Session
     db.query(models.Todos).filter(models.Todos.id==todo_id).delete()
     db.commit()
     return successful_response(200) 
-    
+
+@router.get("/test")
+async def test(req:Request):
+    return templates.TemplateResponse("home.html",{"request":req})
+  
 @router.get("/")
 async def read_all(db:Session=Depends(getDB)):
     return db.query(models.Todos).all()
